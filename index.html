@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PIXELORA 2K26 | CSE Symposium</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+:root{
+  --g1:#00ff88;--g2:#008f44;
+  --grad:linear-gradient(135deg,var(--g1),var(--g2));
+  --bg:#030303;--card-bg:#0a0a0a;
+  --border:rgba(255,255,255,.07);--txt:#f0ece4;
+  --dim:rgba(240,236,228,.45);--surf:rgba(255,255,255,.03);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+h1,h2,h3,h4,.outfit{font-family:'Outfit',sans-serif}
+.bg-glow{position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(ellipse at 15% 10%,rgba(0,255,136,.08) 0%,transparent 55%),
+             radial-gradient(ellipse at 85% 90%,rgba(0,143,68,.06) 0%,transparent 55%),
+             radial-gradient(ellipse at 50% 50%,rgba(0,255,136,.03) 0%,transparent 60%)}
+
+/* ── AMBIENT ORBS & GLOW ── */
+.orb{position:fixed;border-radius:50%;filter:blur(110px);z-index:-2;opacity:0.35;animation:float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);pointer-events:none}
+.orb1{width:45vw;height:45vw;background:var(--g1);top:-5%;left:-10%;animation-delay:0s}
+.orb2{width:50vw;height:50vw;background:var(--g2);bottom:-15%;right:-10%;animation-delay:-5s}
+.orb3{width:40vw;height:40vw;background:var(--g1);top:30%;left:45%;animation-delay:-10s;opacity:0.25}
+@keyframes float{0%{transform:translate(0,0) scale(1)}100%{transform:translate(12vw, 15vh) scale(1.3)}}
+.cursor-glow{position:fixed;top:0;left:0;width:700px;height:700px;background:radial-gradient(circle closest-side, rgba(0,255,136,0.06), transparent);border-radius:50%;transform:translate(-50%,-50%);z-index:-1;pointer-events:none;will-change:transform}
+@media(hover: none) and (pointer: coarse) { .cursor-glow { display: none !important; } }
+
+/* ── NAV ── */
+nav{position:fixed;top:0;width:100%;padding:1.2rem 6%;display:flex;justify-content:space-between;align-items:center;z-index:1000;transition:.5s var(--ease)}
+nav.on{background:rgba(8,8,16,.93);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:.9rem 6%}
+.brand h2{font-size:1.6rem;font-weight:900;letter-spacing:3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand .loc{font-size:.6rem;color:var(--g1);letter-spacing:1.5px;text-transform:uppercase;opacity:.7}
+nav ul{display:flex;gap:2rem;list-style:none}
+nav a{text-decoration:none;color:var(--txt);font-size:.78rem;font-weight:500;text-transform:uppercase;letter-spacing:1.5px;opacity:.55;transition:.3s}
+nav a:hover{opacity:1;color:var(--g1)}
+h1 {
+  font-family: 'Righteous', cursive;
+  font-size: clamp(3rem, 12vw, 6.5rem);
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: -2px;
+  background: linear-gradient(180deg, #fff 30%, var(--g1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(0,255,136,0.3));
+}
+h1 span {
+  display: block;
+  font-size: 0.4em;
+  letter-spacing: 12px;
+  margin-top: 10px;
+  color: var(--g1);
+  -webkit-text-fill-color: var(--g1);
+  text-shadow: 0 0 10px var(--g1);
+}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1001}
+.ham span{display:block;width:22px;height:2px;background:var(--txt);border-radius:2px;transition:.3s}
+.mmenu{display:none;position:fixed;inset:0;background:rgba(8,8,16,.97);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem}
+.mmenu.open{display:flex}
+.mmenu a{font-size:1.8rem;color:var(--txt);text-decoration:none;font-family:'Outfit';font-weight:700;opacity:.8}
+.mmenu a:hover{color:var(--g1);opacity:1}
+
+/* ── LAYOUT ── */
+section{padding:clamp(80px,10vw,130px) clamp(5%,8vw,10%);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;position:relative}
+
+/* ──/* REVEAL — universal scroll pop-up */
+.rv,.ev-card,.com-card,.tm-card,.lead-card,.cdb,.ft-loc-box,.ft-soc,.tl2-card{
+  opacity:0;transform:translateY(30px);
+  transition:opacity .7s var(--ease),transform .7s var(--ease);
+}
+.rv.in,.ev-card.in,.com-card.in,.tm-card.in,.lead-card.in,.cdb.in,.ft-loc-box.in,.ft-soc.in{opacity:1;transform:translateY(0)}
+/* timeline cards get their own directional reveal, keep override */
+.tl2-card{transform:translateX(-40px)}
+.tl2-card.in{opacity:1;transform:translateX(0)}
+.tl2-row:nth-child(even) .tl2-card{transform:translateX(40px)}
+.tl2-row:nth-child(even) .tl2-card.in{transform:translateX(0)}
+/* stagger siblings inside grids */
+.ev-card:nth-child(2),.com-card:nth-child(2),.tm-card:nth-child(2){transition-delay:.1s}
+.ev-card:nth-child(3),.com-card:nth-child(3),.tm-card:nth-child(3){transition-delay:.2s}
+.com-card:nth-child(4){transition-delay:.1s}.com-card:nth-child(5){transition-delay:.2s}.com-card:nth-child(6){transition-delay:.3s}
+.cdb:nth-child(2){transition-delay:.08s}.cdb:nth-child(3){transition-delay:.16s}.cdb:nth-child(4){transition-delay:.24s}
+
+/* ── TITLES ── */
+.stitle{font-size:clamp(2rem,5vw,3.5rem);text-align:center;margin-bottom:.5rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ssub{text-align:center;opacity:.35;font-size:.75rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:4rem}
+
+/* ── HERO ── */
+#hero{text-align:center;min-height:100vh}
+.hdept{font-size:.75rem;letter-spacing:7px;color:var(--g1);text-transform:uppercase;margin-bottom:2.5rem;font-weight:600;display:block}
+.htitle{font-size:clamp(4.5rem,14vw,12rem);font-weight:900;line-height:.85;letter-spacing:-3px;margin-bottom:2rem;display:block}
+.htitle .glow{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 60px rgba(0,255,136,.3))}
+.htag{font-size:clamp(1rem,2.5vw,2rem);color:#ffd475;letter-spacing:clamp(6px,2vw,14px);font-weight:700;text-transform:uppercase;margin-bottom:1.5rem;display:block}
+.hsub{font-size:clamp(.9rem,2vw,1.05rem);opacity:.5;max-width:560px;margin:0 auto 3.5rem;line-height:1.8;display:block}
+.ticker-box{width:100%;max-width:440px;height:86px;margin:0 auto 3.5rem;position:relative;overflow:hidden;border:1px solid var(--border);border-radius:14px;background:rgba(0,255,136,.03)}
+.ti{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateY(12px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.ti.on{opacity:1;transform:translateY(0)}
+.tl{font-size:.62rem;letter-spacing:4px;color:var(--g1);margin-bottom:.3rem;text-transform:uppercase}
+.tv{font-size:1.6rem;font-weight:800;font-family:'Outfit'}
+
+/* ── BTNS ── */
+.btn{display:inline-block;padding:1rem 2.8rem;border-radius:50px;font-weight:800;font-size:.82rem;text-transform:uppercase;letter-spacing:1.5px;text-decoration:none;border:none;cursor:pointer;transition:transform .3s var(--ease),box-shadow .3s,filter .3s}
+.bm{background:var(--grad);color:#fff;box-shadow:0 10px 40px rgba(0,255,136,.4)}
+.bm:hover{transform:scale(1.06);filter:brightness(1.1);box-shadow:0 16px 50px rgba(0,255,136,.6)}
+.bo{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--txt)}
+.bo:hover{border-color:var(--g1);color:var(--g1)}
+
+/* ── COUNTDOWN ── */
+.cds{padding:60px clamp(5%,8vw,10%);text-align:center;background:rgba(0,0,0,.25);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.cdl{font-size:.82rem;letter-spacing:5px;text-transform:uppercase;color:var(--g1);margin-bottom:2.5rem;font-weight:600}
+.cdw{display:flex;justify-content:center;gap:clamp(1rem,3vw,2rem);flex-wrap:wrap;max-width:600px;margin:0 auto}
+.cdb{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:clamp(1rem,3vw,1.5rem) clamp(1.2rem,3vw,2rem);min-width:clamp(70px,15vw,110px);text-align:center;backdrop-filter:blur(10px);transition:transform .3s var(--ease),border-color .3s}
+.cdb:hover{transform:scale(1.08);border-color:var(--g1)}
+.cdn{font-size:clamp(2rem,6vw,3rem);font-weight:900;line-height:1;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cdu{font-size:.62rem;letter-spacing:3px;text-transform:uppercase;opacity:.45;margin-top:.4rem}
+
+/* ── EVENT CARDS (Reference Style) ── */
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(1rem,3vw,2rem);width:100%;max-width:1200px}
+.ev-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:2.5rem 2rem;position:relative;overflow:hidden;transition:all .45s var(--ease);cursor:default}
+.ev-card:hover{border-color:rgba(0,255,136,.3);box-shadow:0 30px 60px rgba(0,0,0,.5),0 0 30px rgba(0,255,136,.07);transform:translateY(-8px)}
+/* small icon badge */
+.ev-badge{width:46px;height:46px;border-radius:10px;background:rgba(0,255,136,.15);border:1px solid rgba(0,255,136,.25);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1rem;position:relative;z-index:2}
+/* large faded watermark icon */
+.ev-wm{position:absolute;top:1.5rem;right:1.5rem;font-size:4.5rem;color:var(--g1);opacity:.08;line-height:1;user-select:none;pointer-events:none}
+.ev-card h3{font-size:1.25rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem;position:relative;z-index:2}
+.ev-card p{font-size:.88rem;opacity:.55;line-height:1.7;margin-bottom:.8rem;position:relative;z-index:2}
+.ev-tag{font-size:.78rem;font-style:italic;color:var(--g1);opacity:.8;margin-bottom:1.2rem;display:block;position:relative;z-index:2}
+.ev-rules{list-style:none;margin-bottom:1.8rem;position:relative;z-index:2}
+.ev-rules li{font-size:.82rem;opacity:.6;margin-bottom:.35rem;display:flex;align-items:center;gap:.5rem}
+.ev-rules li::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--g1);flex-shrink:0}
+.ev-link{font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g1);text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;position:relative;z-index:2;transition:gap .3s}
+.ev-link:hover{gap:1rem}
+.ev-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);opacity:0;transition:.45s}
+.ev-card:hover::before{opacity:1}
+
+/* ── COMMITTEE CARDS ── */
+.com-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:clamp(1rem,2vw,2rem);width:100%;max-width:1200px}
+.com-card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:2rem;transition:all .4s var(--ease)}
+.com-card:hover{transform:translateY(-8px);border-color:rgba(0,255,136,.3);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.com-label{font-size:.62rem;color:var(--g1);letter-spacing:3px;text-transform:uppercase;margin-bottom:.4rem;font-weight:700;display:block}
+.com-name{font-size:1.05rem;font-weight:600;line-height:1.5;color:#fff}
+.dv{height:1px;background:var(--border);margin:1.4rem 0}
+
+/* ── STUDENT TEAM ── */
+.tm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(1rem,2vw,2rem);width:100%;max-width:900px}
+.tm-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:2.5rem 2rem;text-align:center;transition:all .4s var(--ease)}
+.tm-card:hover{transform:translateY(-10px);border-color:rgba(0,255,136,.3);box-shadow:0 25px 60px rgba(0,0,0,.5),0 0 25px rgba(0,255,136,.1)}
+.tm-av{width:68px;height:68px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;margin:0 auto 1.4rem;font-size:1.4rem;font-weight:900;color:#fff;box-shadow:0 8px 28px rgba(0,255,136,.3)}
+.tm-role{font-size:.62rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--g1);margin-bottom:.4rem}
+.tm-name{font-size:1.3rem;font-weight:800;margin-bottom:.3rem}
+.tm-ph{font-size:.78rem;opacity:.35;margin-bottom:1.6rem;letter-spacing:1px}
+.tm-act{display:flex;gap:.7rem;justify-content:center}
+.tm-act a{flex:1;max-width:130px;padding:.6rem 0;border-radius:10px;font-size:.75rem;font-weight:700;text-decoration:none;text-align:center;letter-spacing:.5px;transition:transform .25s,filter .25s}
+.tm-act a:hover{transform:scale(1.06);filter:brightness(1.15)}
+.ac{background:rgba(255,255,255,.05);border:1px solid var(--border);color:#fff}
+.aw{background:#25D366;color:#fff}
+
+/* ── TIMELINE (two-sided) ── */
+.tl2{width:100%;max-width:960px;position:relative}
+/* center spine */
+.tl2::before{content:'';position:absolute;top:0;bottom:0;left:50%;width:1px;background:rgba(0,255,136,.2);transform:translateX(-50%)}
+.tl2-row{display:flex;justify-content:flex-end;padding-right:calc(50% + 30px);margin-bottom:2rem;position:relative}
+.tl2-row:nth-child(even){justify-content:flex-start;padding-right:0;padding-left:calc(50% + 30px)}
+/* dot on spine */
+.tl2-row::after{content:'';position:absolute;top:50%;left:50%;width:12px;height:12px;border-radius:50%;background:var(--g1);box-shadow:0 0 10px var(--g1);transform:translate(-50%,-50%);z-index:2}
+.tl2-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1.6rem 1.8rem;width:100%;max-width:360px;cursor:default;
+  transition:transform .35s var(--ease),border-color .35s,box-shadow .35s;
+  /* scroll reveal — starts hidden */
+  opacity:0;transform:translateX(-40px);transition:opacity .7s var(--ease),transform .7s var(--ease),border-color .35s,box-shadow .35s}
+.tl2-card.in{opacity:1;transform:translateX(0)}
+.tl2-row:nth-child(even) .tl2-card{transform:translateX(40px)}
+.tl2-row:nth-child(even) .tl2-card.in{transform:translateX(0)}
+.tl2-card:hover{transform:translateY(-8px) !important;border-color:rgba(0,255,136,.25);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 20px rgba(0,255,136,.07)}
+.tl2-time{font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--g1);text-transform:uppercase;margin-bottom:.5rem}
+.tl2-card h3{font-size:1.1rem;font-weight:800;margin-bottom:.3rem}
+.tl2-card p{font-size:.82rem;opacity:.5;line-height:1.6}
+@media(max-width:680px){
+  .tl2::before{left:12px}
+  .tl2-row,.tl2-row:nth-child(even){justify-content:flex-start;padding-left:36px;padding-right:0}
+  .tl2-row::after,.tl2-row:nth-child(even)::after{left:12px}
+  .tl2-card,.tl2-row:nth-child(even) .tl2-card{max-width:100%;transform:translateX(20px)}
+  .tl2-card.in,.tl2-row:nth-child(even) .tl2-card.in{transform:translateX(0)}
+}
+
+/* ── ABOUT ── */
+.acard{max-width:940px;text-align:center;border:1px solid var(--border);border-radius:24px;padding:clamp(2rem,5vw,4rem);background:rgba(0,255,136,.02);backdrop-filter:blur(20px)}
+.acard p{font-size:clamp(.95rem,2vw,1.1rem);line-height:1.9;opacity:.8}
+.acard strong{color:var(--g1);font-weight:700}
+
+/* ── REGISTER ── */
+.rcard{border:1px solid var(--g1);border-radius:24px;padding:clamp(2rem,5vw,5rem) clamp(1.5rem,5vw,4rem);text-align:center;max-width:780px;width:100%;background:rgba(0,255,136,.02)}
+.rcard h3{font-size:clamp(1rem,2vw,1.3rem);opacity:.65;margin-bottom:3rem;font-weight:400}
+
+/* ── LEADERSHIP ── */
+.lead-card{background:var(--card-bg);border:1px solid var(--border);border-radius:24px;padding:3rem;display:flex;align-items:center;gap:3rem;max-width:760px;width:100%;transition:all .4s var(--ease)}
+.lead-card:hover{border-color:rgba(0,255,136,.35);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 25px rgba(0,255,136,.15);transform:translateY(-6px)}
+.lead-av{width:90px;height:90px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 8px 30px rgba(0,255,136,.35)}
+.lead-info .lead-role{font-size:.65rem;color:var(--g1);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:.5rem;display:block}
+.lead-info h3{font-size:1.6rem;font-weight:800;margin-bottom:.3rem}
+.lead-info .lead-pos{font-size:.9rem;opacity:.5}
+@media(max-width:500px){.lead-card{flex-direction:column;text-align:center;padding:2rem}.lead-av{margin:0 auto}}
+
+/* ── FOOTER (reference style) ── */
+footer{padding:clamp(50px,8vw,90px) clamp(5%,8vw,10%);border-top:1px solid var(--border);background:rgba(0,0,0,.35)}
+.ft-inner{display:grid;grid-template-columns:1fr 1fr;gap:4rem;max-width:900px;margin:0 auto;align-items:start}
+.ft-title{font-size:clamp(2.5rem,7vw,4rem);font-weight:900;line-height:1;margin-bottom:.8rem}
+.ft-title span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ft-sub{font-size:.95rem;opacity:.5;max-width:340px;line-height:1.7;margin-bottom:1.5rem}
+.ft-section-label{font-size:.65rem;color:var(--g1);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:1.2rem;display:block}
+.ft-loc-box{display:flex;align-items:flex-start;gap:1rem;background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:2rem}
+.ft-loc-icon{width:44px;height:44px;border-radius:10px;background:rgba(0,255,136,.15);border:1px solid rgba(0,255,136,.25);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.ft-loc-text p{font-size:.88rem;line-height:1.6;opacity:.75}
+.ft-soc{display:flex;gap:.8rem}
+.ft-soc a{width:48px;height:48px;border-radius:12px;background:var(--surf);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.2rem;text-decoration:none;transition:transform .3s var(--ease),border-color .3s,background .3s}
+.ft-soc a:hover{transform:translateY(-4px);border-color:var(--g1);background:rgba(0,255,136,.1)}
+.ft-bottom{text-align:center;margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border)}
+.ft-bottom p{font-size:.78rem;opacity:.25;letter-spacing:1px}
+.ft-bottom .credit{opacity:.4;margin-top:.4rem;font-size:.78rem}
+.ft-bottom .credit span{color:var(--g1);opacity:1}
+@media(max-width:640px){.ft-inner{grid-template-columns:1fr;gap:2.5rem}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){.ev-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+  nav ul{display:none}.ham{display:flex}
+  section{padding:90px 5% 60px}
+  .ev-grid,.com-grid{grid-template-columns:1fr}
+  .tm-grid{grid-template-columns:1fr}
+  .htitle{font-size:min(4.5rem,22vw)}.htag{letter-spacing:6px}
+  .acard,.rcard{padding:2rem 1.5rem}
+  .cdw{gap:1rem}
+  .tt{min-width:100px;font-size:.78rem}
+}
+  @media(max-width:480px){
+    .htitle{font-size:3.5rem}
+    .cdn{font-size:2rem}
+    .cdb{min-width:60px;padding:.8rem 1rem}
+    .ev-wm{font-size:3rem}
+  }
+}
+
+/* ── POSTER INTERACTION ── */
+.poster-container{cursor:pointer;position:relative;overflow:hidden;border-radius:10%;border:1px solid rgba(0,255,136,0.25);box-shadow:0 0 100px rgba(0,255,136,0.1),0 40px 80px rgba(0,0,0,0.8);transition:all .5s var(--ease)}
+.poster-container img{transition:transform .5s var(--ease);display:block}
+.poster-container:hover{transform:translateY(-15px) scale(1.02);border-color:rgba(0,255,136,0.5);box-shadow:0 0 120px rgba(0,255,136,0.2),0 50px 100px rgba(0,0,0,0.9)}
+</style>
+</head>
+<body>
+<div class="cursor-glow" id="cglow"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="bg-glow" style="background:url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.8\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23n)\" opacity=\"0.05\"/%3E%3C/svg%3E');z-index:-1;opacity:0.6"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="brand"><h2>PIXELORA</h2><div class="loc">APEC, Melmaruvathur, Chengalpattu</div></div>
+  <ul>
+    <li><a href="#hero">Home</a></li><li><a href="#about">About</a></li>
+    <li><a href="#tech">Events</a></li><li><a href="#schedule">Schedule</a></li>
+    <li><a href="#register">Register</a></li><li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="ham" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+<div class="mmenu" id="mm">
+  <a href="#hero" onclick="toggleMenu()">Home</a><a href="#about" onclick="toggleMenu()">About</a>
+  <a href="#tech" onclick="toggleMenu()">Tech Events</a><a href="#nontech" onclick="toggleMenu()">Non-Tech</a>
+  <a href="#schedule" onclick="toggleMenu()">Schedule</a><a href="#register" onclick="toggleMenu()">Register</a>
+  <a href="#contact" onclick="toggleMenu()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <span class="hdept rv">Department of Computer Science Engineering</span>
+  <span class="htitle rv outfit">PIXELORA<br><span class="glow">2K26</span></span>
+  <span class="htag rv">A NEW BIRTH</span>
+  <span class="hsub rv">Experience the future of Computer Science Engineering through a harmonious blend of logic and creativity.</span>
+  <div class="ticker-box rv">
+    <div class="ti on"><span class="tl">Event Date</span><span class="tv">April 17, 2026</span></div>
+    <div class="ti"><span class="tl">Entry Fee</span><span class="tv">Rs. 150 / Head</span></div>
+    <div class="ti"><span class="tl">Rewards</span><span class="tv">Exciting Prizes</span></div>
+  </div>
+  <a href="#register" class="btn bm rv">Register Now</a>
+</section>
+
+<!-- COUNTDOWN -->
+<div class="cds">
+  <p class="cdl rv">Online Registration Closes In</p>
+  <div class="cdw rv">
+    <div class="cdb"><div class="cdn" id="cd-d">00</div><div class="cdu">Days</div></div>
+    <div class="cdb"><div class="cdn" id="cd-h">00</div><div class="cdu">Hours</div></div>
+    <div class="cdb"><div class="cdn" id="cd-m">00</div><div class="cdu">Minutes</div></div>
+    <div class="cdb"><div class="cdn" id="cd-s">00</div><div class="cdu">Seconds</div></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <h2 class="stitle rv">About Symposium</h2>
+  <p class="ssub rv">A Legacy of Innovation</p>
+  <div class="acard rv">
+    <p><strong>PIXELORA 2K26</strong> is a flagship symposium organized by the <strong>Department of Computer Science Engineering</strong>, bringing together innovation, creativity, and technical excellence.</p><br>
+    <p>Built on the vision of <strong>"A NEW BIRTH,"</strong> it provides a platform for students to explore, showcase, and innovate. Join us in redefining the boundaries of the digital world.</p>
+    <div style="margin-top:2.5rem; display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem">
+      <div class="rv" style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.03); padding:0.8rem 1.4rem; border-radius:12px; border:1px solid var(--border)">
+        <i class="ph ph-cookie" style="color:var(--g1); font-size:1.4rem; filter:drop-shadow(0 0 8px var(--g1))"></i>
+        <span style="font-size:0.88rem; font-weight:600; opacity:0.8">Snacks &amp; Food Provided</span>
+      </div>
+      <div class="rv" style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.03); padding:0.8rem 1.4rem; border-radius:12px; border:1px solid var(--border)">
+        <i class="ph ph-leaf" style="color:var(--g1); font-size:1.4rem; filter:drop-shadow(0 0 8px var(--g1))"></i>
+        <span style="font-size:0.88rem; font-weight:600; opacity:0.8">Veg &amp; Non-Veg</span>
+        <i class="ph ph-hamburger" style="color:var(--g1); font-size:1.4rem; filter:drop-shadow(0 0 8px var(--g1))"></i>
+      </div>
+      <div class="rv" style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.03); padding:0.8rem 1.4rem; border-radius:12px; border:1px solid var(--border)">
+        <i class="ph ph-buildings" style="color:var(--g1); font-size:1.4rem; filter:drop-shadow(0 0 8px var(--g1))"></i>
+        <span style="font-size:0.88rem; font-weight:600; opacity:0.8">Venue: Main Block Auditorium</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POSTER SECTION -->
+<section id="poster" style="padding:clamp(60px,10vw,120px) 5%; min-height:auto; background:radial-gradient(circle at 50% 50%, rgba(0,255,136,0.08) 0%, #030303 75%)">
+  <div class="rv poster-container" style="width:100%; max-width:1000px; margin:0 auto">
+    <!-- Glow behind the poster -->
+    <div style="position:absolute; inset:20px; background:var(--grad); filter:blur(100px); opacity:0.15; z-index:-1"></div>
+    
+    <a href="PIXELORA.jpg" target="_blank" style="display:block; text-decoration:none">
+      <img src="PIXELORA.jpg" alt="PIXELORA 2K26 Poster" style="width:100%; height:auto">
+    </a>
+  </div>
+</section>
+
+<!-- TECH EVENTS -->
+<section id="tech">
+  <h2 class="stitle rv">Technical Events</h2>
+  <p class="ssub rv">Push the Boundaries</p>
+  <div class="ev-grid">
+    <div class="ev-card rv d1">
+      <div class="ev-badge"><i class="ph ph-lightbulb"></i></div>
+      <i class="ev-wm ph ph-lightbulb"></i>
+      <h3>Innopitch</h3>
+      <span class="ev-tag">Pitch the impossible. Convince the inevitable.</span>
+      <p>Present innovative ideas solving real-world problems and compete for the best pitch.</p>
+      <ul class="ev-rules">
+        <li>Individual / Team (Max 3)</li>
+        <li>3-min pitch + 2-min Q&A</li>
+        <li>Original ideas only</li>
+        <li>Venue: Main Block Auditorium</li>
+        <li>Best 3 performers awarded</li>
+      </ul>
+      <a href="#register" class="ev-link">Register →</a>
+    </div>
+    <div class="ev-card rv d2">
+      <div class="ev-badge"><i class="ph ph-code"></i></div>
+      <i class="ev-wm ph ph-code"></i>
+      <h3>DevFolio</h3>
+      <span class="ev-tag">Don't say your skills. Show them.</span>
+      <p>Develop a portfolio (on-spot scenario) involving real-world coding challenges.</p>
+      <ul class="ev-rules">
+        <li>Individual participation</li>
+        <li>On-spot scenario dev</li>
+        <li>Must involve coding</li>
+        <li>Venue: CSE Main Lab</li>
+        <li>Best 3 performers awarded</li>
+      </ul>
+      <a href="#register" class="ev-link">Register →</a>
+    </div>
+    <div class="ev-card rv d3">
+      <div class="ev-badge"><i class="ph ph-cpu"></i></div>
+      <i class="ev-wm ph ph-cpu"></i>
+      <h3>PromptCraft</h3>
+      <span class="ev-tag">One prompt. Infinite imagination.</span>
+      <p>Create AI-generated visuals using a single, carefully crafted prompt.</p>
+      <ul class="ev-rules">
+        <li>Individual participation</li>
+        <li>2 rounds (20 mins each)</li>
+        <li>Single prompt generation</li>
+        <li>Venue: Multimedia Lab</li>
+        <li>Best 3 performers awarded</li>
+      </ul>
+      <a href="#register" class="ev-link">Register →</a>
+    </div>
+  </div>
+</section>
+
+<!-- NON-TECH -->
+<section id="nontech">
+  <h2 class="stitle rv">Non-Technical Events</h2>
+  <p class="ssub rv">Fun Meets Strategy</p>
+  <div class="ev-grid">
+    <div class="ev-card rv d1">
+      <div class="ev-badge"><i class="ph ph-strategy"></i></div>
+      <i class="ev-wm ph ph-strategy"></i>
+      <h3>Chess Master</h3>
+      <span class="ev-tag">Where strategy becomes supremacy.</span>
+      <ul class="ev-rules">
+        <li>Individual only</li>
+        <li>2 Rounds, 15 min each</li>
+        <li>Played on Chess.com</li>
+        <li>Standard chess rules</li>
+      </ul>
+      <a href="#register" class="ev-link">Register →</a>
+    </div>
+    <div class="ev-card rv d2">
+      <div class="ev-badge"><i class="ph ph-music-notes"></i></div>
+      <i class="ev-wm ph ph-music-notes"></i>
+      <h3>Visual Connect</h3>
+      <span class="ev-tag">Guess the pic, crack the clue.</span>
+      <ul class="ev-rules">
+        <li>Team (2–3 members)</li>
+        <li>2 Rounds, 20 min each</li>
+        <li>Songs from visual clues</li>
+        <li>Raise hand &amp; answer fast</li>
+        <li>Top 3 teams win</li>
+      </ul>
+      <a href="#register" class="ev-link">Register →</a>
+    </div>
+    <div class="ev-card rv d3">
+      <div class="ev-badge"><i class="ph ph-currency-inr"></i></div>
+      <i class="ev-wm ph ph-currency-inr"></i>
+      <h3>IPL Auction</h3>
+      <span class="ev-tag">Bid smart, build strong.</span>
+      <ul class="ev-rules">
+        <li>Team (3–4) | Budget: 100C</li>
+        <li>Squad: 15 (11 Play + 4 Sub)</li>
+        <li>Overseas slots: 6 | Max 4 in 11</li>
+        <li>Bid smart, build your team</li>
+      </ul>
+      <a href="#register" class="ev-link">Register →</a>
+    </div>
+  </div>
+</section>
+
+<!-- SCHEDULE -->
+<section id="schedule">
+  <h2 class="stitle rv">Event Schedule</h2>
+  <p class="ssub rv">17 April 2026</p>
+  <div class="tl2">
+    <div class="tl2-row"><div class="tl2-card"><div class="tl2-time">09:00 – 10:45</div><h3><i class="ph ph-microphone-stage" style="color:var(--g1);margin-right:8px"></i>Inauguration</h3><p>Opening ceremony and keynote</p></div></div>
+    <div class="tl2-row"><div class="tl2-card"><div class="tl2-time">10:45 – 11:00</div><h3><i class="ph ph-coffee" style="color:var(--g1);margin-right:8px"></i>Break</h3><p>Network and refresh</p></div></div>
+    <div class="tl2-row"><div class="tl2-card"><div class="tl2-time">11:00 – 12:30</div><h3><i class="ph ph-code" style="color:var(--g1);margin-right:8px"></i>Technical Events</h3><p>Innopitch, DevFolio, PromptCraft</p></div></div>
+    <div class="tl2-row"><div class="tl2-card"><div class="tl2-time">12:30 – 01:30</div><h3><i class="ph ph-bowl-food" style="color:var(--g1);margin-right:8px"></i>Lunch Break</h3><p>Recharge and connect (Veg & Non-Veg)</p></div></div>
+    <div class="tl2-row"><div class="tl2-card"><div class="tl2-time">01:30 – 03:00</div><h3><i class="ph ph-strategy" style="color:var(--g1);margin-right:8px"></i>Non-Technical Events</h3><p>Chess Master, Visual Connect, IPL Auction</p></div></div>
+    <div class="tl2-row"><div class="tl2-card"><div class="tl2-time">03:00 – 03:40</div><h3><i class="ph ph-trophy" style="color:var(--g1);margin-right:8px"></i>Valedictory</h3><p>Certificates and Prizes Distribution</p></div></div>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section id="register">
+  <h2 class="stitle rv">Register Now</h2>
+  <p class="ssub rv">Claim Your Spot</p>
+  <div class="rcard rv" id="rcard">
+    <h3>Secure your spot at PIXELORA 2K26. Slots are filling fast.</h3>
+    <a href="https://forms.gle/6gFDSk9Azt5Lpij6A" target="_blank" class="btn bm" id="reg-btn">REGISTER HERE</a>
+  </div>
+</section>
+
+<!-- COMMITTEE -->
+<section id="committee">
+  <h2 class="stitle rv">Organizing Committee</h2>
+  <p class="ssub rv">The Minds Behind the Mission</p>
+  <div class="com-grid">
+    <div class="com-card rv d1"><span class="com-label">Conveners</span><p class="com-name">Mr. G. Sekar<br>Ms. S. Swetha</p><div class="dv"></div><span class="com-label">Event Coordination</span><p class="com-name">Ms. V. Thamaraiselvi</p></div>
+    <div class="com-card rv d2"><span class="com-label">Registration</span><p class="com-name">Ms. A. Jayanthi<br>Ms. D. Teena</p><div class="dv"></div><span class="com-label">Editorial</span><p class="com-name">Mr. G. Srinivasan</p></div>
+    <div class="com-card rv d3"><span class="com-label">Session Management</span><p class="com-name">Mr. K. Chairmadurai<br>Ms. T. M. Padmapriya</p></div>
+    <div class="com-card rv d1"><span class="com-label">Design</span><p class="com-name">Ms. P. Gajalakshmi<br>Ms. S. Sangavi</p><div class="dv"></div><span class="com-label">Food &amp; Media</span><p class="com-name">Dr. R. Srivel<br>Mr. G. Srinivasan</p></div>
+    <div class="com-card rv d2"><span class="com-label">Executive</span><p class="com-name">Ms. R. Swathy<br>Ms. V. Sumithra</p><div class="dv"></div><span class="com-label">Public Addressing</span><p class="com-name">Ms. S. Subashini<br>Mr. S. Hariganesan</p></div>
+    <div class="com-card rv d3"><span class="com-label">Treasurer</span><p class="com-name">Mr. G. Sekar</p></div>
+  </div>
+</section>
+
+<!-- STUDENT COMMITTEE -->
+<section id="student-committee">
+  <h2 class="stitle rv">Student Committee</h2>
+  <p class="ssub rv">The Driving Force</p>
+  <div class="tm-grid">
+    <div class="tm-card rv d1"><div class="tm-av">EV</div><p class="tm-role">Vice President</p><h3 class="tm-name">Ellakiya V</h3><p class="tm-ph">+91 99407 64517</p><div class="tm-act"><a href="tel:9940764517" class="ac">Call</a><a href="https://wa.me/919940764517" target="_blank" class="aw">WhatsApp</a></div></div>
+    <div class="tm-card rv d2"><div class="tm-av">SV</div><p class="tm-role">Secretary</p><h3 class="tm-name">Sachin V</h3><p class="tm-ph">+91 99407 64517</p><div class="tm-act"><a href="tel:9940764517" class="ac">Call</a><a href="https://wa.me/919940764517" target="_blank" class="aw">WhatsApp</a></div></div>
+    <div class="tm-card rv d1"><div class="tm-av">GP</div><p class="tm-role">Technical Head</p><h3 class="tm-name">Gokulkumar P</h3><p class="tm-ph">+91 93631 35589</p><div class="tm-act"><a href="tel:9363135589" class="ac">Call</a><a href="https://wa.me/919363135589" target="_blank" class="aw">WhatsApp</a></div></div>
+    <div class="tm-card rv d2"><div class="tm-av">DK</div><p class="tm-role">Non-Tech Head &amp; Joint Secretary</p><h3 class="tm-name">Dinesh Karthik</h3><p class="tm-ph">+91 91501 54087</p><div class="tm-act"><a href="tel:9150154087" class="ac">Call</a><a href="https://wa.me/919150154087" target="_blank" class="aw">WhatsApp</a></div></div>
+  </div>
+</section>
+
+<!-- LEADERSHIP -->
+<section id="leadership" style="min-height:auto;padding:80px clamp(5%,8vw,10%)">
+  <h2 class="stitle rv">Leadership</h2>
+  <p class="ssub rv">Guided by Excellence</p>
+  <div class="lead-card rv">
+    <div class="lead-av">CD</div>
+    <div class="lead-info">
+      <span class="lead-role">Head of Department</span>
+      <h3>Dr.C.Dhaya</h3>
+      <p class="lead-pos">Department of Computer Science Engineering<br>APEC, Melmaruvathur</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT / FOOTER -->
+<footer id="contact">
+  <div class="ft-inner">
+    <div>
+      <h2 class="ft-title outfit rv">GET IN <span>TOUCH</span></h2>
+      <p class="ft-sub rv">Have questions about the symposium? Our team is here to help.</p>
+      <span class="ft-section-label rv">Follow Us Online</span>
+      <div class="ft-soc rv">
+        <a href="https://www.instagram.com/namma_cse" target="_blank" title="Instagram"><i class="ph ph-instagram-logo"></i></a>
+        <a href="https://youtube.com/@cse_pixelora" target="_blank" title="YouTube"><i class="ph ph-youtube-logo"></i></a>
+        <a href="mailto:csepixelora@gmail.com" title="Email"><i class="ph ph-envelope-simple"></i></a>
+      </div>
+    </div>
+    <div>
+      <span class="ft-section-label rv">Location</span>
+      <div class="ft-loc-box rv">
+        <div class="ft-loc-icon"><i class="ph ph-map-pin"></i></div>
+        <div class="ft-loc-text">
+          <p>Main Block, Adhiparasakthi Engineering College,<br>Melmaruvathur &ndash; 603319, Tamil Nadu.</p>
+        </div>
+      </div>
+      <span class="ft-section-label rv">Email</span>
+      <div class="ft-loc-box rv">
+        <div class="ft-loc-icon"><i class="ph ph-envelope-simple"></i></div>
+        <div class="ft-loc-text">
+          <p>csepixelora@gmail.com</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    <p>&copy; 2026 PIXELORA. All Rights Reserved.</p>
+    <p class="credit">Designed &amp; Developed by <span>SACHIN V</span></p>
+  </div>
+</footer>
+
+<script>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('on',scrollY>60));
+function toggleMenu(){document.getElementById('mm').classList.toggle('open')}
+
+/* Universal scroll-reveal: auto-targets ALL revealable elements */
+const REVEAL_SEL = '.rv,.ev-card,.com-card,.tm-card,.lead-card,.cdb,.ft-loc-box,.ft-soc,.tl2-card';
+function chk(){
+  const t = innerHeight * .88;
+  document.querySelectorAll(REVEAL_SEL).forEach(el=>{
+    if(el.getBoundingClientRect().top < t) el.classList.add('in');
+  });
+}
+addEventListener('scroll', chk, {passive:true});
+chk(); /* run on load for above-fold items */
+const ti=document.querySelectorAll('.ti');let ix=0;
+setInterval(()=>{ti[ix].classList.remove('on');ix=(ix+1)%ti.length;ti[ix].classList.add('on')},3500);
+const end=new Date('2026-04-16T18:00:00').getTime();
+function upd(){const g=end-Date.now();if(g<=0)return;const d=Math.floor(g/864e5),h=Math.floor(g%864e5/36e5),m=Math.floor(g%36e5/6e4),s=Math.floor(g%6e4/1e3);['d','h','m','s'].forEach((k,i)=>document.getElementById('cd-'+k).textContent=String([d,h,m,s][i]).padStart(2,'0'))}
+upd();setInterval(upd,1000);
+</script>
+
+<!-- Master-Level Polish Dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+<script>
+// Lenis Smooth Scroll
+const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))});
+function raf(t) { lenis.raf(t); requestAnimationFrame(raf); }
+requestAnimationFrame(raf);
+
+// Mouse Tracking Spotlight
+const cg = document.getElementById('cglow');
+addEventListener('mousemove', (e) => { cg.style.transform = `translate(${e.clientX - 350}px, ${e.clientY - 350}px)`});
+
+// Vanilla Tilt 3D Physics (applied to all card types)
+VanillaTilt.init(document.querySelectorAll(".ev-card, .com-card, .tm-card, .tl2-card, .lead-card, .poster-container"), { max: 7, speed: 400, glare: true, "max-glare": 0.12, scale: 1.01 });
+
+// Registration Success Logic
+const regBtn = document.getElementById('reg-btn');
+const rcard = document.getElementById('rcard');
+if(regBtn){
+  regBtn.addEventListener('click',()=>{
+    setTimeout(()=>{
+      rcard.innerHTML = `<h3 style="color:var(--g1);font-size:clamp(1.5rem,4vw,2.5rem);margin-bottom:1rem">SUCCESSFULLY COMPLETED</h3><p style="opacity:.6">Registered Successfully – See you at Pixelora!</p>`;
+    }, 1500);
+  });
+}
+</script>
+</body>
+</html>
